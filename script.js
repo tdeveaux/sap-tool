@@ -118,7 +118,13 @@ function isValidBarcode(value) {
 function filterTexts(text) {
   // if (!(/[^0-9]/).test(text) && text.length > 11 && !picks.includes(text)) {
   if (!(/[^0-9]/).test(text)) {
+    // Article number can be valid EAN-8
+    if (text.length === 8 && isValidBarcode(text) &&
+      !confirm(`${text}: Is this a UPC code?`)) {
+      return;
+    }
     if (text.length === 14) {
+      // Remove padding from EAN-13
       text = text.slice(1);
     }
     if (isValidBarcode(text) && !picks.includes(text)) {
