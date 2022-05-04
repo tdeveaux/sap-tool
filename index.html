@@ -7,13 +7,15 @@
   <script src="script.js" type="module"></script>
 </head>
 <body>
-  Pick list: <button id="addButton">Add</button>
-  <button id="viewButton">View</button>
-  <button id="clearButton">Clear</button>
-  <button id="flashButton">Flash: Off</button>
-  <br>
-  BarcodeDetector: <button id="start">Start</button>
-  <div><video width="100%" id="video" autoplay></div>
-  <pre size="40" id="result"></pre>
+  <div class="main">
+    <div class="nav">
+    <button id="flashButton">Flash</button>
+    <button id="viewButton">View</button>
+    <button id="clearButton">Clear</button>
+    </div>
+    <button id="addButton">+</button>
+    <video width="100%" id="video" autoplay>
+  </div>
+  <pre id="result"></pre>
 </body>
 </html>

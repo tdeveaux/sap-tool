@@ -1,3 +1,42 @@
 body {
+  background-color: #202124;
+  color: #fff;
   margin: 0;
+}
+
+.main {
+  position: relative;
+}
+
+.nav {
+  position: absolute;
+  right: 15px;
+  top: 15px;
+}
+
+button {
+  background-color: #2196f3;
+  border-radius: 5px;
+  border: 0;
+  color: #fff;
+  padding: 15px;
+  position: relative;
+  z-index: 1;
+}
+
+#flashButton {
+  text-decoration: line-through;
+}
+
+#addButton {
+  background-color: #2196f3;
+  border-radius: 50%;
+  border: 0;
+  bottom: 0;
+  font-size: 1.6rem;
+  height: 56px;
+  left: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 56px;
 }

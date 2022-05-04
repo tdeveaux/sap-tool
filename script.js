@@ -2,7 +2,6 @@
 // https://wicg.github.io/shape-detection-api/
 let picks = JSON.parse(sessionStorage.getItem('picks')) || [];
 try {
-  const start = document.getElementById('start');
   const video = document.getElementById('video');
   const result = document.getElementById('result');
   const barcodeDetector = new BarcodeDetector();
@@ -26,8 +25,7 @@ try {
 
   video.addEventListener('play', () => capture());
 
-  start.addEventListener('click', () => {
-    start.disabled = true;
+  (() => {
     (async () => {
       const media = await navigator.mediaDevices.getUserMedia({
         audio: false,
@@ -37,28 +35,27 @@ try {
       });
       const track = await media.getVideoTracks()[0];
       const flashButton = document.getElementById('flashButton');
+      flashButton.style.textDecoration = 'line-through';
       flashButton.addEventListener('click', function () {
-        if (flashButton.textContent === 'Flash: Off') {
+        if (flashButton.style.textDecoration === 'line-through') {
           track.applyConstraints({
             advanced: [{
               torch: true
             }]
           });
-          flashButton.textContent = 'Flash: On';
+          flashButton.style.textDecoration = 'none';
         } else {
           track.applyConstraints({
             advanced: [{
               torch: false
             }]
           });
-          flashButton.textContent = 'Flash: Off';
+          flashButton.style.textDecoration = 'line-through';
         }
       });
       video.srcObject = media;
     })().catch(console.error);
-  }, {
-    once: true
-  });
+  })();
 } catch (error) {
   result.textContent = error;
 }
@@ -118,16 +115,15 @@ function isValidBarcode(value) {
 function filterTexts(text) {
   // if (!(/[^0-9]/).test(text) && text.length > 11 && !picks.includes(text)) {
   if (!(/[^0-9]/).test(text)) {
-    // Article number can be valid EAN-8
-    if (text.length === 8 && isValidBarcode(text) &&
-      !confirm(`${text}: Is this a UPC code?`)) {
-      return;
-    }
     if (text.length === 14) {
       // Remove padding from EAN-13
       text = text.slice(1);
     }
     if (isValidBarcode(text) && !picks.includes(text)) {
+      // Article number can be valid EAN-8
+      if (text.length === 8 && !confirm(`${text}: Is this a UPC code?`)) {
+        return;
+      }
       picks.push(text);
     }
   }
@@ -159,21 +155,20 @@ function clearPickList() {
 async function wakeLock() {
   try {
     await navigator.wakeLock.request('screen');
-    alert('Preventing sleep');
+    // alert('Preventing sleep');
   } catch (error) {
     result.textContent = error;
   }
 }
 
 function main() {
-  const addButton = document.getElementById('addButton');
   const viewButton = document.getElementById('viewButton');
   const clearButton = document.getElementById('clearButton');
-  addButton.addEventListener('click', addPicks);
+  const addButton = document.getElementById('addButton');
   viewButton.addEventListener('click', viewPicks);
   clearButton.addEventListener('click', clearPickList);
+  addButton.addEventListener('click', addPicks);
   wakeLock();
-  start.click();
 }
 
 main();
