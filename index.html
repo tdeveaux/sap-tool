@@ -3,18 +3,20 @@
 <head>
   <title>sap-tool</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+        rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
   <script src="script.js" type="module"></script>
 </head>
 <body>
   <div class="main">
-    <div class="nav">
-    <button id="flashButton">Flash</button>
-    <button id="viewButton">View</button>
-    <button id="clearButton">Clear</button>
+    <div class="actions">
+    <span class="material-icons md-36" id="flashButton">flashlight_off</span>
+    <span class="material-icons md-36" id="listButton">list</span>
+    <span class="material-icons md-36" id="deleteButton">delete</span>
     </div>
-    <button id="addButton">+</button>
-    <video width="100%" id="video" autoplay>
+    <span class="material-icons md-48" id="addButton">add_circle</span>
+    <video id="video" width="100%" autoplay>
   </div>
   <pre id="result"></pre>
 </body>

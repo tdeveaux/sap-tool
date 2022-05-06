@@ -14,7 +14,7 @@ try {
       }) => `${format}: ${rawValue}`).join('\n');
       barcodes.forEach((barcode) => {
         if (picks.includes(barcode.rawValue)) {
-          alert(barcode.rawValue + ': match');
+          alert(`${barcode.rawValue}: match`);
         }
       });
       requestAnimationFrame(capture);
@@ -35,22 +35,21 @@ try {
       });
       const track = await media.getVideoTracks()[0];
       const flashButton = document.getElementById('flashButton');
-      flashButton.style.textDecoration = 'line-through';
       flashButton.addEventListener('click', function () {
-        if (flashButton.style.textDecoration === 'line-through') {
+        if (flashButton.textContent === 'flashlight_off') {
           track.applyConstraints({
             advanced: [{
               torch: true
             }]
           });
-          flashButton.style.textDecoration = 'none';
+          flashButton.textContent = 'flashlight_on';
         } else {
           track.applyConstraints({
             advanced: [{
               torch: false
             }]
           });
-          flashButton.style.textDecoration = 'line-through';
+          flashButton.textContent = 'flashlight_off';
         }
       });
       video.srcObject = media;
@@ -121,7 +120,7 @@ function filterTexts(text) {
     }
     if (isValidBarcode(text) && !picks.includes(text)) {
       // Article number can be valid EAN-8
-      if (text.length === 8 && !confirm(`${text}: Is this a UPC code?`)) {
+      if (text.length === 8 && !confirm(`Add ${text}?`)) {
         return;
       }
       picks.push(text);
@@ -130,7 +129,7 @@ function filterTexts(text) {
 }
 
 function viewPicks() {
-  alert('Total: ' + picks.length + '\n' + picks.join('\n'));
+  alert(`Total: ${picks.length}\n${picks.join('\n')}`);
 }
 
 async function addPicks() {
@@ -146,7 +145,7 @@ async function addPicks() {
 }
 
 function clearPickList() {
-  if (confirm('Clear pick list?')) {
+  if (confirm('Delete pick list?')) {
     picks = [];
     sessionStorage.clear();
   }
@@ -155,18 +154,17 @@ function clearPickList() {
 async function wakeLock() {
   try {
     await navigator.wakeLock.request('screen');
-    // alert('Preventing sleep');
   } catch (error) {
     result.textContent = error;
   }
 }
 
 function main() {
-  const viewButton = document.getElementById('viewButton');
-  const clearButton = document.getElementById('clearButton');
+  const listButton = document.getElementById('listButton');
+  const deleteButton = document.getElementById('deleteButton');
   const addButton = document.getElementById('addButton');
-  viewButton.addEventListener('click', viewPicks);
-  clearButton.addEventListener('click', clearPickList);
+  listButton.addEventListener('click', viewPicks);
+  deleteButton.addEventListener('click', clearPickList);
   addButton.addEventListener('click', addPicks);
   wakeLock();
 }
