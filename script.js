@@ -112,7 +112,6 @@ function isValidBarcode(value) {
 // }
 
 function filterTexts(text) {
-  // if (!(/[^0-9]/).test(text) && text.length > 11 && !picks.includes(text)) {
   if (!(/[^0-9]/).test(text)) {
     if (text.length === 14) {
       // Remove padding from EAN-13
