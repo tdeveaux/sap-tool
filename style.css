@@ -10,6 +10,11 @@ body {
 
 .view {
   position: relative;
+  user-select: none;
+}
+
+video {
+  display: block;
 }
 
 .actions {
@@ -18,8 +23,8 @@ body {
   justify-content: end;
   padding: 16px;
   position: absolute;
+  top: 0;
   width: 100%;
-  z-index: 1;
 }
 
 .material-symbols-rounded {
@@ -39,9 +44,4 @@ body {
   left: 50%;
   position: absolute;
   transform: translate(-50%, -50%);
-  z-index: 1;
-}
-
-video {
-  display: block;
 }
