@@ -39,7 +39,7 @@ video {
   font-size: 48px;
 }
 
-#addButton {
+.add-button {
   bottom: -12px;
   left: 50%;
   position: absolute;

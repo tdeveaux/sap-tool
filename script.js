@@ -1,65 +1,28 @@
 // WICG Shape Detection API
 // https://wicg.github.io/shape-detection-api/
-let picks = JSON.parse(sessionStorage.getItem('picks')) || [];
-try {
-  const video = document.getElementById('video');
-  const result = document.getElementById('result');
-  const barcodeDetector = new BarcodeDetector();
-  const capture = async () => {
+let picks = [];
+const log = document.querySelector('.log');
+const video = document.querySelector('video');
+
+function showPicks() {
+  'use strict';
+  alert(`Total: ${picks.length}\n${picks.join('\n')}`);
+}
+
+function deletePicks() {
+  'use strict';
+  if (confirm('Delete picks?')) {
+    picks = [];
     try {
-      const barcodes = await barcodeDetector.detect(video);
-      result.textContent = barcodes.map(({
-        format,
-        rawValue
-      }) => `${format}: ${rawValue}`).join('\n');
-      barcodes.forEach((barcode) => {
-        if (picks.includes(barcode.rawValue)) {
-          alert(`${barcode.rawValue}: match`);
-        }
-      });
-      requestAnimationFrame(capture);
+      sessionStorage.clear();
     } catch (error) {
-      result.textContent = error;
+      log.textContent = error;
     }
-  };
-
-  video.addEventListener('play', () => capture());
-
-  (() => {
-    (async () => {
-      const media = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: {
-          facingMode: 'environment'
-        }
-      });
-      const track = await media.getVideoTracks()[0];
-      const flashButton = document.getElementById('flashButton');
-      flashButton.addEventListener('click', function () {
-        if (flashButton.textContent === 'flashlight_off') {
-          track.applyConstraints({
-            advanced: [{
-              torch: true
-            }]
-          });
-          flashButton.textContent = 'flashlight_on';
-        } else {
-          track.applyConstraints({
-            advanced: [{
-              torch: false
-            }]
-          });
-          flashButton.textContent = 'flashlight_off';
-        }
-      });
-      video.srcObject = media;
-    })().catch(console.error);
-  })();
-} catch (error) {
-  result.textContent = error;
+  }
 }
 
 function isValidBarcode(value) {
+  'use strict';
   // We only allow correct length barcodes
   if (!value.match(/^(\d{8}|\d{12,14})$/)) {
     return false;
@@ -75,43 +38,8 @@ function isValidBarcode(value) {
   return ((10 - (result % 10)) % 10) === parseInt(paddedValue.charAt(13), 10);
 }
 
-// function isValidBarcode(barcode) {
-//   'use strict';
-//   const lastDigit = Number(barcode.slice(-1));
-//   let digits = [];
-//   let i = 0;
-//   let oddTotal = 0;
-//   let evenTotal = 0;
-//   let checksum = 0;
-//   if (Number.isNaN(lastDigit)) {
-//     return false;
-//   }
-//   if (barcode.length < 8 || barcode.length > 18 ||
-//     (barcode.length != 8 && barcode.length != 12 &&
-//       barcode.length != 13 && barcode.length != 14 &&
-//       barcode.length != 18)) {
-//     return false;
-//   }
-//   if (Number.isNaN(lastDigit)) {
-//     return false;
-//   }
-//   digits = barcode.slice(0, -1).split('');
-//   while (i < barcode.length - 1) {
-//     if (Number.isNaN(digits[i])) {
-//       return false;
-//     }
-//     if (i % 2 === 0) {
-//       oddTotal += Number(digits[i]);
-//     } else {
-//       evenTotal += Number(digits[i]);
-//     }
-//     i += 1;
-//   }
-//   checksum = (10 - ((evenTotal + (oddTotal * 3)) % 10)) % 10;
-//   return checksum === lastDigit;
-// }
-
 function filterTexts(text) {
+  'use strict';
   if (!(/[^0-9]/).test(text)) {
     if (text.length === 14) {
       // Remove padding from EAN-13
@@ -127,45 +55,88 @@ function filterTexts(text) {
   }
 }
 
-function viewPicks() {
-  alert(`Total: ${picks.length}\n${picks.join('\n')}`);
-}
-
 async function addPicks() {
+  'use strict';
   try {
     const textDetector = new TextDetector();
     const texts = await textDetector.detect(video);
     texts.forEach(text => filterTexts(text.rawValue));
     sessionStorage.setItem('picks', JSON.stringify(picks));
-    viewPicks();
+    showPicks();
   } catch (error) {
-    result.textContent = error;
+    log.textContent = error;
   }
 }
 
-function clearPickList() {
-  if (confirm('Delete pick list?')) {
-    picks = [];
-    sessionStorage.clear();
-  }
-}
-
-async function wakeLock() {
+async function startCamera() {
+  'use strict';
   try {
+    const media = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: {
+        facingMode: 'environment'
+      }
+    });
+    const barcodeDetector = new BarcodeDetector();
+    const detectBarcodes = async () => {
+      try {
+        const barcodes = await barcodeDetector.detect(video);
+        log.textContent = barcodes.map(({
+          format,
+          rawValue
+        }) => `${format}: ${rawValue}`).join('\n');
+        barcodes.forEach((barcode) => {
+          if (picks.includes(barcode.rawValue)) {
+            alert(`${barcode.rawValue}: match`);
+          }
+        });
+        requestAnimationFrame(detectBarcodes);
+      } catch (error) {
+        log.textContent = error;
+      }
+    };
+    const flashButton = document.querySelector('.flash-button');
+    const track = await media.getVideoTracks()[0];
+    const toggleFlash = () => {
+      if (flashButton.textContent === 'flashlight_off') {
+        track.applyConstraints({
+          advanced: [{
+            torch: true
+          }]
+        });
+        flashButton.textContent = 'flashlight_on';
+      } else {
+        track.applyConstraints({
+          advanced: [{
+            torch: false
+          }]
+        });
+        flashButton.textContent = 'flashlight_off';
+      }
+    };
     await navigator.wakeLock.request('screen');
+    video.srcObject = media;
+    video.addEventListener('play', detectBarcodes);
+    flashButton.addEventListener('click', toggleFlash);
   } catch (error) {
-    result.textContent = error;
+    log.textContent = error;
   }
 }
 
 function main() {
-  const listButton = document.getElementById('listButton');
-  const deleteButton = document.getElementById('deleteButton');
-  const addButton = document.getElementById('addButton');
-  listButton.addEventListener('click', viewPicks);
-  deleteButton.addEventListener('click', clearPickList);
+  'use strict';
+  const listButton = document.querySelector('.list-button');
+  const deleteButton = document.querySelector('.delete-button');
+  const addButton = document.querySelector('.add-button');
+  listButton.addEventListener('click', showPicks);
+  deleteButton.addEventListener('click', deletePicks);
   addButton.addEventListener('click', addPicks);
-  wakeLock();
+  try {
+    picks = JSON.parse(sessionStorage.getItem('picks')) || [];
+  } catch (error) {
+    log.textContent = error;
+  }
+  startCamera();
 }
 
 main();
