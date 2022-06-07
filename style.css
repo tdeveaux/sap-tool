@@ -12,6 +12,13 @@ body {
   user-select: none;
 }
 
+@media (orientation: landscape) {
+  video {
+    height: 225px;
+    object-fit: cover;
+  }
+}
+
 video {
   display: block;
 }
@@ -21,7 +28,7 @@ video {
   gap: 16px;
   justify-content: end;
   padding: 16px;
-  position: absolute;
+  position: fixed;
   top: 0;
   width: 100%;
 }
@@ -43,7 +50,7 @@ video {
   display: inline-flex;
   height: 56px;
   justify-content: center;
-  position: absolute;
+  position: fixed;
   right: 16px;
   width: 56px;
 }
