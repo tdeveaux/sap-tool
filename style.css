@@ -14,7 +14,7 @@ body {
 
 @media (orientation: landscape) {
   video {
-    height: 225px;
+    height: calc(100vh - 103.33px);
     object-fit: cover;
   }
 }

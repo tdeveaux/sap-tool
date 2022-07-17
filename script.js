@@ -6,7 +6,7 @@ const video = document.querySelector('video');
 
 function showPicks() {
   'use strict';
-  alert(`Total: ${picks.length}\n${picks.join('\n')}`);
+  log.textContent = `Picks: ${picks.length}\n${picks.join('\n')}`;
 }
 
 function deletePicks() {
@@ -18,6 +18,7 @@ function deletePicks() {
     } catch (error) {
       log.textContent = error;
     }
+    showPicks();
   }
 }
 
@@ -40,7 +41,7 @@ function isValidBarcode(value) {
 
 function filterTexts(text) {
   'use strict';
-  if (!(/[^0-9]/).test(text)) {
+  if ((/[0-9]/).test(text)) {
     if (text.length === 14) {
       // Remove padding from EAN-13
       text = text.slice(1);
@@ -81,10 +82,12 @@ async function startCamera() {
     const detectBarcodes = async () => {
       try {
         const barcodes = await barcodeDetector.detect(video);
-        log.textContent = barcodes.map(({
-          format,
-          rawValue
-        }) => `${format}: ${rawValue}`).join('\n');
+        if (barcodes.length) {
+          log.textContent = barcodes.map(({
+            format,
+            rawValue
+          }) => `${format}: ${rawValue}`).join('\n');
+        }
         barcodes.forEach((barcode) => {
           if (picks.includes(barcode.rawValue)) {
             alert(`${barcode.rawValue}: match`);
@@ -118,6 +121,7 @@ async function startCamera() {
     video.srcObject = media;
     video.addEventListener('play', detectBarcodes);
     flashButton.addEventListener('click', toggleFlash);
+    showPicks();
   } catch (error) {
     log.textContent = error;
   }
